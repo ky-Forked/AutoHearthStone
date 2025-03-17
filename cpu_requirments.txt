@@ -1,0 +1,7 @@
+ultralytics
+paddlepaddle
+paddleocr
+pygame
+pyautogui
+pynput
+pywin32

@@ -1,0 +1,14 @@
+# 配置文件示例
+
+size: [1920, 1080]  # 窗口大小，根据本机实际分辨率进行调整
+
+# 模型路径配置，请勿随意替换
+object_model_path: "runs/detect/train/weights/best.pt"
+hand_model_path: "runs/segment/train4/weights/best.pt"  # 手牌识别
+card_model_path: "runs/detect/card/weights/best.pt"   # 卡牌识别
+
+# 其他配置项
+threshold: 0.5    # 视觉识别阈值
+drag_duration: 0.2  # 拖动操作时长
+interval: 800     # 操作间隔时长
+enable_sort: false  # 是否启用排序功能。（实验性功能，谨慎使用。）

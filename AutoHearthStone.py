@@ -18,7 +18,7 @@ from ultralytics import YOLO
 
 class AutoHearthStone:
     def __init__(self, size: Tuple[int, int], object_model_path: str, hand_model_path: str, card_model_path: str,
-                 threshold: float = 0.5):
+                 threshold: float = 0.5, drag_duration: int = 0.2, interval: int = 0.8, enable_sort: bool = False):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.screen = None
         self.size = size
@@ -29,12 +29,18 @@ class AutoHearthStone:
         self.objects_model_path = object_model_path
         self.hand_model_path = hand_model_path
         self.card_model_path = card_model_path
-        self.hand_model = YOLO("runs/segment/train4/weights/best.pt")
+        self.hand_model = YOLO(self.hand_model_path)
         self.objects_model = YOLO(self.objects_model_path)
         self.card_model = YOLO(self.card_model_path)
+        self.key_map = {"pause":pynput.keyboard.KeyCode.from_char("p")}
+        self.listener = keyboard.Listener(on_press=self.handle_key_pressed)
         self.threshold = threshold
         self.border_color = (0, 255, 0)
         self.border_size = 2
+        self.drag_duration = drag_duration
+        self.interval = interval
+        self.enable_sort = enable_sort
+        # 运行时变量
         self.state = None
         self.minions = None
         self.taverns = None
@@ -44,18 +50,16 @@ class AutoHearthStone:
         self.hands = None
         self.skills = None
         self.sequence = None
-        self.drag_duration = 0.2
-        self.interval = 0.8
         self.is_done = False
         self.is_paused = True
         self.is_sorted = False
-        self.enable_sort = False
-        self.key_map = {"pause":pynput.keyboard.KeyCode.from_char("p")}
-        self.listener = keyboard.Listener(on_press=self.handle_key_pressed)
+
 
 
     def init_transparent_window(self):
         pygame.init()
+        pygame.display.set_caption("AutoHearthStone-Battlegrounds")
+        pygame.display.set_icon()
         self.screen = pygame.display.set_mode(self.size)
         # 透明窗口设置
         hwnd = pygame.display.get_wm_info()['window']
@@ -519,6 +523,9 @@ class AutoHearthStone:
 
     def sort(self):
         # 实验性功能
+        if not self.enable_sort:
+            self.is_sorted = True
+            return
         target_seq = self.sequence
         original_seq = []
         for minion in self.minions:
@@ -544,24 +551,23 @@ class AutoHearthStone:
                         self.drag(self.minions[j][:2],self.minions[i][:2])
                         self.clear()
                         pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
-                        #time.sleep(0.2)
         # 反向再来一遍
-        # for i in range(len(target_seq)):
-        #     if now_seq[i] not in target_seq[i]:
-        #         for j in range(i+1, len(now_seq)):
-        #             if now_seq[j] in target_seq[i]:
-        #                 name = now_seq[j]
-        #                 now_seq.pop(j)
-        #                 now_seq.insert(i, name)
-        #                 self.drag(self.minions[j][:2],self.minions[i][:2])
-        #                 self.clear()
-        #                 pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
-        #                 #time.sleep(0.2)
+        now_seq = original_seq
+        for i in range(len(target_seq)-1, -1, -1):
+            if now_seq[i] not in target_seq[i]:
+                for j in range(i-1, -1):
+                    if now_seq[j] in target_seq[i]:
+                        name = now_seq[j]
+                        now_seq.pop(j)
+                        now_seq.insert(i, name)
+                        self.drag(self.minions[j][:2],self.minions[i][:2])
+                        self.clear()
+                        pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
         self.is_sorted = True
         return
 
 if __name__ == "__main__":
-    AutoHearthStone((1920, 1080), "runs/detect/train/weights/best.pt", "models/hand/best.pt",
+    AutoHearthStone((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
                     "runs/detect/card/weights/best.pt").run()
 
 
