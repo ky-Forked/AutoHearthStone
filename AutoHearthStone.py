@@ -1,5 +1,6 @@
 import re
 import sys
+import threading
 import time
 from typing import Tuple
 
@@ -25,13 +26,13 @@ class AutoHearthStone:
         self.width, self.height = size
         self.transparent_color = (255, 0, 128)
         self.font_size = 20
-        self.ocr = PaddleOCR(lang='ch')
         self.objects_model_path = object_model_path
         self.hand_model_path = hand_model_path
         self.card_model_path = card_model_path
-        self.hand_model = YOLO(self.hand_model_path)
-        self.objects_model = YOLO(self.objects_model_path)
-        self.card_model = YOLO(self.card_model_path)
+        self.ocr = None
+        self.hand_model = None
+        self.objects_model = None
+        self.card_model = None
         self.key_map = {"pause":pynput.keyboard.KeyCode.from_char("p")}
         self.listener = keyboard.Listener(on_press=self.handle_key_pressed)
         self.threshold = threshold
@@ -40,43 +41,28 @@ class AutoHearthStone:
         self.drag_duration = drag_duration
         self.interval = interval
         self.enable_sort = enable_sort
+        # 处理线程
+        self.process_thread = threading.Thread(target=self.process, name="ProcessThread")
         # 运行时变量
         self.state = None
-        self.minions = None
-        self.taverns = None
+        self.minions = []
+        self.taverns = []
         self.buttons = None
         self.bob = None
         self.hero = None
-        self.hands = None
+        self.hands = []
         self.skills = None
         self.sequence = None
         self.is_done = False
         self.is_paused = True
         self.is_sorted = False
 
-
-
-    def init_transparent_window(self):
-        pygame.init()
-        pygame.display.set_caption("AutoHearthStone-Battlegrounds")
-        #pygame.display.set_icon()
-        self.screen = pygame.display.set_mode(self.size)
-        # 透明窗口设置
-        hwnd = pygame.display.get_wm_info()['window']
-        win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
-                               win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
-        win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(*self.transparent_color), 0, win32con.LWA_COLORKEY)
-        win32gui.SetWindowPos(hwnd, -1, 0, 0, self.width, self.height, 3)
-
-    def run(self):
-        self.init_transparent_window()
+    def process(self):
+        self.load_models()
         self.listener.start()
+        self.clear()
         while not self.is_done:
             time.sleep(self.interval)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
             # pause
             if self.is_paused:
                 self.pause()
@@ -105,6 +91,51 @@ class AutoHearthStone:
             self.execute_operation(operation)
             pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
 
+
+    def init_transparent_window(self):
+        pygame.init()
+        pygame.display.set_caption("AutoHearthStone-Battlegrounds")
+        #pygame.display.set_icon()
+        self.screen = pygame.display.set_mode(self.size)
+        # 透明窗口设置
+        hwnd = pygame.display.get_wm_info()['window']
+        win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE,
+                               win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
+        win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(*self.transparent_color), 0, win32con.LWA_COLORKEY)
+        win32gui.SetWindowPos(hwnd, -1, 0, 0, self.width, self.height, 3)
+        self.clear()
+
+    def load_models(self):
+        start_time = time.time()
+        self.loading_log("Loading PaddleOCR...")
+        self.ocr = PaddleOCR(lang='ch')
+        self.loading_log("Loading hand model...")
+        self.hand_model = YOLO(self.hand_model_path)
+        self.loading_log("Loading objects model...")
+        self.objects_model = YOLO(self.objects_model_path)
+        self.loading_log("Loading card model...")
+        self.card_model = YOLO(self.card_model_path)
+        end_time = time.time()
+        self.loading_log(f"All models loaded! ({end_time - start_time:.2f} seconds used)")
+        time.sleep(2)
+        self.loading_log("Press p to pause automatic operation.")
+        time.sleep(2)
+        self.loading_log("Enjoy! @Joooook")
+        time.sleep(2)
+
+    def run(self):
+        self.init_transparent_window()
+        self.process_thread.start()
+        while not self.is_done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.is_done = True
+                    pygame.quit()
+                    sys.exit()
+            self.display_info()
+            pygame.display.update()
+
+
     def pause(self):
         self.screen.fill(self.transparent_color)
         surf_width = 150
@@ -116,7 +147,6 @@ class AutoHearthStone:
         screen_center_x = self.width / 2
         screen_center_y = self.height / 2
         self.screen.blit(surf, (screen_center_x- surf_width /2, screen_center_y - surf_height /2))
-        pygame.display.flip()
 
     def handle_key_pressed(self, key):
         if key == self.key_map["pause"]:
@@ -278,7 +308,6 @@ class AutoHearthStone:
         for result in results:
             self.draw_box(result['label'] + str(result['conf']), result['top_left'] + result['bottom_right'],
                           self.border_color, self.border_size)
-        pygame.display.flip()
         return results
 
     def detect_cards(self, screenshot):
@@ -305,7 +334,6 @@ class AutoHearthStone:
                 if confidence > self.threshold:
                     results.append((int(x), int(y)))
                     pygame.draw.circle(self.screen, (0, 255, 255), (int(x), int(y)), 5)
-        pygame.display.flip()
         results.sort(key=lambda x: x[0])
         return results
 
@@ -420,7 +448,6 @@ class AutoHearthStone:
 
     def clear(self):
         self.screen.fill(self.transparent_color)
-        pygame.display.flip()
 
     def draw_box(self, label: str, box, color=(0, 255, 0), thickness: int = 2):
         # 画框
@@ -442,17 +469,12 @@ class AutoHearthStone:
     def draw_minions(self):
         for minion in self.minions:
             pygame.draw.circle(self.screen, (255, 105, 10), (minion[0], minion[1] - 10), 3)
-        pygame.display.flip()
         return
 
     def draw_taverns(self):
         for tavern in self.taverns:
             pygame.draw.circle(self.screen, (255, 105, 10), (tavern[0], tavern[1] - 10), 3)
-        pygame.display.flip()
         return
-
-    def log(self):
-        pass
 
     def click(self, pos):
         if not pos:
@@ -460,7 +482,6 @@ class AutoHearthStone:
         # pyautogui.moveTo(pos[0], pos[1])
         pyautogui.click(pos[0], pos[1])
         pygame.draw.circle(self.screen, (255, 0, 0), pos, 5)
-        pygame.display.flip()
 
     def drag(self, start_pos, end_pos):
         if not start_pos or not end_pos:
@@ -471,7 +492,6 @@ class AutoHearthStone:
         pyautogui.dragTo(x2, y2, duration=self.drag_duration)
         pygame.draw.circle(self.screen, (255, 0, 0), start_pos, 5)
         pygame.draw.circle(self.screen, (255, 0, 0), end_pos, 5)
-        pygame.display.flip()
 
     def select(self, index):
         if index is None:
@@ -565,6 +585,55 @@ class AutoHearthStone:
                         pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
         self.is_sorted = True
         return
+
+    def loading_log(self, message: str):
+        self.clear()
+        position = (self.width // 2, self.height // 2)
+        self.draw_text(message, 30, (236,206,180), position, center=True, background = True, background_color=(14,50,101), border_size = 20 ,border_radius = 10)
+
+    def draw_text(self, message: str, font_size: int, font_color: tuple, position: tuple[int, int], center: bool = False, background: bool = False, background_color: tuple = (255,255,255,128), border_size: int = 10, border_radius: int =10):
+        if len(background_color) == 3:
+            background_color = (*background_color,128)
+        if len(font_color) == 3:
+            font_color = (*font_color,128)
+        font = pygame.font.Font(None, font_size)
+        text_surface = font.render(message, True, font_color)
+        text_rect = text_surface.get_rect()
+        background_rect = text_rect.copy()
+        if background:
+            background_rect.width += border_size
+            background_rect.height += border_size
+            background_rect.x -= border_size//2
+            background_rect.y -= border_size//2
+        if center:
+            background_rect.center = position
+        else:
+            background_rect.topleft = position
+        pygame.draw.rect(self.screen, background_color, background_rect, border_radius=border_radius)
+        text_rect.center = background_rect.center
+        self.screen.blit(text_surface, text_rect)
+
+
+    def display_info(self):
+        """
+        显示必要信息
+        :return:
+        """
+        log_font_size = 20
+        info_font_color = (29, 76, 80)
+        warning_font_color = (211, 164, 136)
+        background_color = (242, 231, 229)
+        border_size = 10
+        if self.is_paused:
+            self.draw_text("Paused", log_font_size, warning_font_color, (0, 0), background=True, background_color=background_color, border_size=border_size)
+            return
+        minion_count = len(self.minions)
+        tavern_count = len(self.taverns)
+        hand_count = len(self.hands)
+        self.draw_text(f"Running, hands: {hand_count}, minions: {minion_count}, taverns: {tavern_count}", log_font_size, info_font_color, (0, 0), background=True,
+                       background_color=background_color, border_size=border_size)
+        return
+
 
 if __name__ == "__main__":
     AutoHearthStone((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
