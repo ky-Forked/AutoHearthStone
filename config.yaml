@@ -10,5 +10,5 @@ card_model_path: "runs/detect/card/weights/best.pt"   # 卡牌识别
 # 其他配置项
 threshold: 0.5    # 视觉识别阈值
 drag_duration: 0.2  # 拖动操作时长
-interval: 800     # 操作间隔时长
-enable_sort: false  # 是否启用排序功能。（实验性功能，谨慎使用。）
+interval: 0.8     # 操作间隔时长
+enable_sort: true  # 是否启用排序功能。（实验性功能，谨慎使用。）

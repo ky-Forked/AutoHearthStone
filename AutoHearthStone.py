@@ -59,7 +59,7 @@ class AutoHearthStone:
     def init_transparent_window(self):
         pygame.init()
         pygame.display.set_caption("AutoHearthStone-Battlegrounds")
-        pygame.display.set_icon()
+        #pygame.display.set_icon()
         self.screen = pygame.display.set_mode(self.size)
         # 透明窗口设置
         hwnd = pygame.display.get_wm_info()['window']
@@ -509,6 +509,7 @@ class AutoHearthStone:
 
     def ocr_card_texts(self) -> list:
         self.clear()
+        time.sleep(0.5)
         screenshot = pyautogui.screenshot()
         results = self.detect_cards(screenshot)
         card_texts = []
@@ -530,7 +531,7 @@ class AutoHearthStone:
         original_seq = []
         for minion in self.minions:
             x,y,w,h = minion
-            pyautogui.moveTo(x, y)
+            pyautogui.moveTo(x, y, duration=self.drag_duration)
             time.sleep(0.5)
             texts = self.ocr_card_texts()
             pattern = re.compile(r'[^\u4e00-\u9fa5]') # 过滤中文
@@ -552,7 +553,6 @@ class AutoHearthStone:
                         self.clear()
                         pyautogui.moveTo(10, 100)  # 鼠标复位防止遮挡
         # 反向再来一遍
-        now_seq = original_seq
         for i in range(len(target_seq)-1, -1, -1):
             if now_seq[i] not in target_seq[i]:
                 for j in range(i-1, -1):
