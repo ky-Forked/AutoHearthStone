@@ -2,9 +2,9 @@
 <div align="center">
 
 [![](https://img.shields.io/badge/Joooook-blue.svg?logo=github&lable=python&labelColor=497568&color=497568&style=flat-square)](https://github.com/Joooook)
-[![](https://img.shields.io/badge/Joooook-blue.svg?logo=bilibili&logoColor=white&lable=python&labelColor=af7a82&color=af7a82&style=flat-square)](https://github.com/Joooook)
+[![](https://img.shields.io/badge/Joooook-blue.svg?logo=bilibili&logoColor=white&lable=python&labelColor=af7a82&color=af7a82&style=flat-square)](https://space.bilibili.com/3546386788255839)
 ![](https://img.shields.io/badge/Python-blue.svg?logo=python&lable=python&logoColor=white&labelColor=192c3b&color=192c3b&style=flat-square)
-[![](https://img.shields.io/github/stars/Joooook/AutoHearthStone?logo=reverbnation&lable=python&logoColor=white&labelColor=ffc773&color=ffc773&style=flat-square)]()
+![](https://img.shields.io/github/stars/Joooook/AutoHearthStone?logo=reverbnation&lable=python&logoColor=white&labelColor=ffc773&color=ffc773&style=flat-square)
 ![](https://img.shields.io/github/last-commit/Joooook/AutoHearthStone.svg?style=flat-square)
 ![](https://img.shields.io/github/license/Joooook/AutoHearthStone.svg?style=flat-square&color=000000)
 </div>
