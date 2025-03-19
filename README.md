@@ -37,6 +37,13 @@ pip install -r cpu_requirements.txt
 
 ### GPU
 自行安装对应GPU版本的[pytorch](https://github.com/pytorch/pytorch)和[paddle](https://github.com/PaddlePaddle/Paddle)，然后安装剩余依赖。
+
+注意pytorch和paddle的兼容问题，安装相同显卡驱动的版本。（以11.8为例）
+~~~bash
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install paddlepaddle-gpu==3.0.0rc1 paddlepaddle-cuda=11.8 -c paddle -c nvidia
+~~~
+安装剩余依赖
 ~~~bash
 git clone https://github.com/Joooook/AutoHearthStone
 pip install -r gpu_requirements.txt
