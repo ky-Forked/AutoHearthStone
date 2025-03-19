@@ -25,7 +25,7 @@ AutoHS is a project that aims to automate the gameplay of Hearthstone, using yol
 - 自动操作
 
 <div align="center"> 
-<img src="imgs/img_1.png" style="border-radius: 10px; width: 800px" />
+<img src="imgs/img_1.png"/>
 </div>
 
 ## <div align="center">⚙️Installation</div>
