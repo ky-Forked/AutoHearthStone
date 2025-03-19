@@ -1,7 +1,7 @@
 import io
 import sys
 import yaml
-from AutoHearthStone import AutoHearthStone
+from AutoHearthStone import AutoBattleGrounds
 
 if sys.stderr is None:
     sys.stderr = io.StringIO()
@@ -12,4 +12,4 @@ if sys.stdout is None:
 with open('config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.safe_load(file)
 print(config)
-AutoHearthStone(**config).run()
+AutoBattleGrounds(**config).run()
