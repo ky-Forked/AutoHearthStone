@@ -33,9 +33,10 @@ pip install -r cpu_requirements.txt
 ~~~
 
 ### GPU
-自行安装对应GPU版本的[pytorch](https://github.com/pytorch/pytorch)和[paddle](https://github.com/PaddlePaddle/Paddle)
+自行安装对应GPU版本的[pytorch](https://github.com/pytorch/pytorch)和[paddle](https://github.com/PaddlePaddle/Paddle)，然后安装剩余依赖。
 ~~~bash
-
+git clone https://github.com/Joooook/AutoHearthStone
+pip install -r gpu_requirements.txt
 ~~~
 
 
@@ -47,10 +48,12 @@ python main.py
 ~~~
 
 ### Python
+
 ~~~python
-from AutoHearthStone import AutoHearthStone
-AutoHearthStone((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
-                    "runs/detect/card/weights/best.pt").run()
+from AutoHearthStone import AutoBattleGrounds
+
+AutoBattleGrounds((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
+                  "runs/detect/card/weights/best.pt").run()
 ~~~
 
 ### Executable File
