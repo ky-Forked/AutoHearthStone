@@ -1,4 +1,7 @@
-# <div align="center">AutoHearthStone</div>
+# <div align="center">
+![AutoHearthStone](https://socialify.git.ci/Joooook/AutoHearthStone/image?font=KoHo&logo=https%3A%2F%2Fs2.loli.net%2F2025%2F03%2F19%2FSAOga86HheUlnv7.png&name=1&owner=1&pattern=Signal&theme=Auto)
+</div>
+
 <div align="center">
 
 [![](https://img.shields.io/badge/Joooook-blue.svg?logo=github&lable=python&labelColor=497568&color=497568&style=flat-square)](https://github.com/Joooook)
@@ -21,7 +24,7 @@ AutoHS is a project that aims to automate the gameplay of Hearthstone, using yol
 - 视觉识别战棋物体
 - 自动操作
 <div align="center"> 
-<img src="imgs/img_1.png" alt="help" style="border-radius: 20px;" width="500px"/>
+  <img src="imgs/img_1.png" width=800px/>
 </div>
 
 ## <div align="center">⚙️Installation</div>
