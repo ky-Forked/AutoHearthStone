@@ -23,7 +23,7 @@ BASE64_ICON = "iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAABdWlDQ1BrQ0dDb2xvc
 
 class AutoBattleGrounds:
     def __init__(self, size: Tuple[int, int], object_model_path: str, hand_model_path: str, card_model_path: str,
-                 threshold: float = 0.5, drag_duration: int = 0.2, interval: int = 0.8, enable_sort: bool = False):
+                 threshold: float = 0.5, drag_duration: int = 0.3, interval: int = 1, enable_sort: bool = False):
         # 窗口及绘制相关属性
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.screen = None
@@ -50,6 +50,7 @@ class AutoBattleGrounds:
         self.drag_duration = drag_duration
         self.interval = interval
         self.enable_sort = enable_sort
+        pyautogui.FAILSAFE = False
         # 处理线程
         self.process_thread = threading.Thread(target=self.process, name="ProcessThread")
         # 运行时变量
@@ -66,6 +67,7 @@ class AutoBattleGrounds:
         self.is_paused = True
         self.is_sorted = False
 
+
     def process(self):
         """
         逻辑处理函数，负责检测，执行操作
@@ -75,6 +77,7 @@ class AutoBattleGrounds:
         self.listener.start()
         self.clear()
         while not self.is_done:
+            self.clear()
             time.sleep(self.interval)
             # pause
             if self.is_paused:
@@ -82,7 +85,6 @@ class AutoBattleGrounds:
                 continue
             # 主逻辑
             # 识别部分
-            self.clear()
             screenshot = pyautogui.screenshot()
             results = self.detect_objects(screenshot)
             results.sort(key=lambda x: x['conf'], reverse=True)
@@ -462,44 +464,44 @@ class AutoBattleGrounds:
         self.is_sorted = False
         try:
             if "购买" in operation:
-                res = re.search(r"购买(\d)", operation)
+                res = re.search(r"购买(\d+)", operation)
                 index = int(res.groups()[0]) - 1
                 self.drag(self.taverns[index], self.hero)
             elif "打出" in operation:
                 battlecry = False
                 target_pos = self.hero
-                res = re.search(r"打出(\d)", operation)
+                res = re.search(r"打出(\d+)", operation)
                 index = int(res.groups()[0]) - 1
                 if "目标是我方" in operation:
-                    res = re.search(r"目标是我方(\d)", operation)
+                    res = re.search(r"目标是我方(\d+)", operation)
                     target_index = int(res.groups()[0]) - 1
                     x, y, w, h = self.minions[target_index]
                     target_pos = (x - int(float(w) / 4), y)  # 偏左，保证磁力情况
                     pyautogui.moveTo(self.hands[index][0], self.hands[index][1] + 10)
-                    time.sleep(0.2)
+                    time.sleep(0.3)
                     texts = self.ocr_card_texts()
                     if "战吼" in texts[0] or "抉择" in texts[0]:
                         battlecry = True
                 elif "目标是酒馆" in operation:
-                    res = re.search(r"目标是酒馆(\d)", operation)
+                    res = re.search(r"目标是酒馆(\d+)", operation)
                     target_index = int(res.groups()[0]) - 1
                     target_pos = self.taverns[target_index]
                 self.drag((self.hands[index][0], self.hands[index][1] + 10), target_pos)
                 if "选择" in operation:
                     target_text = lines[-1]
-                    time.sleep(0.3)
+                    time.sleep(0.2)
                     self.select_by_text(target_text)
                 if battlecry:
                     # 战吼情况 要额外点击一下
-                    res = re.search(r"目标是我方(\d)", operation)
+                    res = re.search(r"目标是我方(\d+)", operation)
                     target_index = int(res.groups()[0]) - 1
                     x, y, w, h = self.minions[target_index]
                     target_pos = (x + int(float(w) * 3 / 4), y)  # 战吼情况会上一只怪，所以目标位置偏右
-                    time.sleep(0.3)
+                    time.sleep(0.2)
                     self.click(target_pos)
 
             elif "出售" in operation:
-                res = re.search(r"出售(\d)", operation)
+                res = re.search(r"出售(\d+)", operation)
                 index = int(res.groups()[0]) - 1
                 self.drag(self.minions[index][:2], self.bob)
             elif "升级" in operation:
@@ -521,20 +523,20 @@ class AutoBattleGrounds:
                 if not target_skill:
                     return
                 if "目标是我方" in operation:
-                    res = re.search(r"目标是我方(\d)", operation)
+                    res = re.search(r"目标是我方(\d+)", operation)
                     target_index = int(res.groups()[0]) - 1
                     x, y, w, h = self.minions[target_index]
                     target_pos = (x, y)
                     self.drag(target_skill, target_pos)
                 elif "目标是酒馆" in operation:
-                    res = re.search(r"目标是酒馆(\d)", operation)
+                    res = re.search(r"目标是酒馆(\d+)", operation)
                     target_index = int(res.groups()[0]) - 1
                     target_pos = self.taverns[target_index]
                     self.drag(target_skill, target_pos)
                 else:
                     self.click(target_skill)
             elif "选择" in operation:
-                res = re.search(r"选择(\d)", operation)
+                res = re.search(r"选择(\d+)", operation)
                 index = int(res.groups()[0]) - 1
                 self.select(index)
             elif operation.startswith("结束回合") and not self.is_sorted:
@@ -548,6 +550,7 @@ class AutoBattleGrounds:
         :return:
         """
         self.screen.fill(self.transparent_color)
+        pygame.display.update()
 
     def draw_box(self, label: str, box: tuple[int, int, int, int], color=(0, 255, 0), thickness: int = 2):
         """
@@ -695,7 +698,7 @@ class AutoBattleGrounds:
         站位排序功能，实验性
         :return:
         """
-        if not self.enable_sort:
+        if not self.enable_sort or not self.sequence:
             self.is_sorted = True
             return
         target_seq = self.sequence
@@ -703,7 +706,7 @@ class AutoBattleGrounds:
         for minion in self.minions:
             x, y, w, h = minion
             pyautogui.moveTo(x, y, duration=self.drag_duration)
-            time.sleep(0.5)
+            time.sleep(0.2)
             texts = self.ocr_card_texts()
             pattern = re.compile(r'[^\u4e00-\u9fa5]')  # 过滤中文
             filtered_text = pattern.sub('', texts[0])
@@ -803,7 +806,7 @@ class AutoBattleGrounds:
         minion_count = len(self.minions)
         tavern_count = len(self.taverns)
         hand_count = len(self.hands)
-        self.draw_text(f"Running, hands: {hand_count}, minions: {minion_count}, taverns: {tavern_count}", log_font_size,
+        self.draw_text(f"AutoBattleGrounds is running, hands: {hand_count}, minions: {minion_count}, taverns: {tavern_count}", log_font_size,
                        info_font_color, (0, 0), background=True,
                        background_color=background_color, border_size=border_size)
         return
@@ -811,7 +814,7 @@ class AutoBattleGrounds:
 
 if __name__ == "__main__":
     AutoBattleGrounds((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
-                    "runs/detect/card/weights/best.pt").run()
+                    "runs/detect/card/weights/best.pt", enable_sort=True).run()
 
 # 马林
 # 适配不同技能使用
