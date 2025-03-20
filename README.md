@@ -37,6 +37,18 @@ pip install -r cpu_requirements.txt
 
 ### GPU
 自行安装对应GPU版本的[pytorch](https://github.com/pytorch/pytorch)和[paddle](https://github.com/PaddlePaddle/Paddle)，然后安装剩余依赖。
+
+注意pytorch和paddle的兼容问题，安装相同显卡驱动的版本。（以11.8为例，如果你的nvdia驱动是12.x，此方法将不适用）
+
+~~~bash
+conda install pytorch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1  pytorch-cuda=11.8 -c pytorch -c nvidia
+conda install paddlepaddle-gpu==3.0.0rc1 paddlepaddle-cuda=11.8 -c paddle -c nvidia
+~~~
+
+或者可以安装二者其一的GPU版本，这里建议安装pytorch的gpu版本
+
+之后安装剩余依赖
+
 ~~~bash
 git clone https://github.com/Joooook/AutoHearthStone
 pip install -r gpu_requirements.txt
@@ -101,6 +113,6 @@ enable_sort: true  # 是否启用排序功能。（实验性功能，谨慎使�
 请我喝杯奶茶吧。
 <div align="center"> 
 <a href="https://afdian.com/item/2a0e0cdcadf911ef9f725254001e7c00">
-  <img src="https://s2.loli.net/2024/11/29/1JBxzphs7V6WcK9.jpg" width="300px">
+  <img src="https://s2.loli.net/2024/11/29/1JBxzphs7V6WcK9.jpg" width="500px">
 </a>
 </div>
