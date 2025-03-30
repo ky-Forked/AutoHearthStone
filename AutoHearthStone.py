@@ -77,7 +77,6 @@ class AutoBattleGrounds:
         self.listener.start()
         self.clear()
         while not self.is_done:
-            self.clear()
             time.sleep(self.interval)
             # pause
             if self.is_paused:
@@ -85,6 +84,7 @@ class AutoBattleGrounds:
                 continue
             # 主逻辑
             # 识别部分
+            self.clear()
             screenshot = pyautogui.screenshot()
             results = self.detect_objects(screenshot)
             results.sort(key=lambda x: x['conf'], reverse=True)
@@ -422,7 +422,7 @@ class AutoBattleGrounds:
                 if confidence > self.threshold:
                     results.append((int(x), int(y)))
                     pygame.draw.circle(self.screen, (0, 255, 255), (int(x), int(y)), 5)
-        results.sort(key=lambda x: x[0])
+        results.sort(key=lambda a: a[0])
         return results
 
     def detect(self, model, screenshot) -> list[dict]:
@@ -550,7 +550,7 @@ class AutoBattleGrounds:
         :return:
         """
         self.screen.fill(self.transparent_color)
-        pygame.display.update()
+        pygame.display.flip()
 
     def draw_box(self, label: str, box: tuple[int, int, int, int], color=(0, 255, 0), thickness: int = 2):
         """
@@ -638,6 +638,7 @@ class AutoBattleGrounds:
             cx, cy = int((x1 + x2) / 2), int((y1 + y2) / 2)
             selections.append((cx, cy))
         selections.sort(key=lambda x: x[0])
+        print(selections)
         self.click(selections[index])
 
     def select_by_text(self, target_text: str):
