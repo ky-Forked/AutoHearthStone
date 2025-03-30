@@ -18,8 +18,12 @@
    "value": false
   },
   {
-   "optionDest": "upx_dir",
-   "value": "C:/Users/Jok/PycharmProjects/AutoHearthStone/upx-5.0.0-win64"
+   "optionDest": "icon_file",
+   "value": "C:/Users/Jok/PycharmProjects/AutoHearthStone/icon.ico"
+  },
+  {
+   "optionDest": "name",
+   "value": "AutoHearthStone"
   },
   {
    "optionDest": "clean_build",
