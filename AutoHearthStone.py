@@ -508,7 +508,7 @@ class AutoBattleGrounds:
                 self.click(self.buttons['upgrade'])
             elif "刷新" in operation:
                 self.click(self.buttons['refresh'])
-            elif "冻结" in operation:
+            elif "冻结" in operation or "解冻" in operation:
                 self.click(self.buttons['freeze'])
             elif "使用" in operation:
                 target_skill = None
