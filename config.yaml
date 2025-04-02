@@ -1,6 +1,7 @@
 # 配置文件示例
 
-size: [1920, 1080]  # 窗口大小，根据本机实际分辨率进行调整
+# 窗口大小，默认为自识别本机分辨率
+# size: [1920, 1080]
 
 # 模型路径配置，请勿随意替换
 object_model_path: "runs/detect/train/weights/best.pt"
