@@ -67,7 +67,7 @@ python main.py
 ~~~python
 from AutoHearthStone import AutoBattleGrounds
 
-AutoBattleGrounds((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
+AutoBattleGrounds("runs/detect/train/weights/best.pt", "runs/segment/train4/weights/best.pt",
                   "runs/detect/card/weights/best.pt").run()
 ~~~
 
@@ -76,8 +76,8 @@ AutoBattleGrounds((1920, 1080), "runs/detect/train/weights/best.pt", "runs/segme
 下载编译好的release，在config.yaml中进行配置
 ~~~yaml
 # 配置文件示例
-
-size: [1920, 1080]  # 窗口大小，根据本机实际分辨率进行调整
+# 窗口大小，默认为自识别本机分辨率
+# size: [1920, 1080]
 
 # 模型路径配置，请勿随意替换
 object_model_path: "runs/detect/train/weights/best.pt"
