@@ -12,6 +12,8 @@
 ![](https://img.shields.io/github/license/Joooook/AutoHearthStone.svg?style=flat-square&color=000000)
 </div>
 
+# 该项目将不再更新和维护！
+
 - [English](README_en.md)
 - [Zh](README.md)
 ## <div align="center">👋Introduction</div>
